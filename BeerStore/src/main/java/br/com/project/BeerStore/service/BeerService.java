@@ -2,11 +2,13 @@ package br.com.project.BeerStore.service;
 
 import br.com.project.BeerStore.model.Beer;
 import br.com.project.BeerStore.repository.Beers;
-import br.com.project.BeerStore.service.exception.BeerAlreadExistException;
+import br.com.project.BeerStore.service.exception.BeerAlreadyExistException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class BeerService {
 
     private Beers beers;
@@ -15,13 +17,25 @@ public class BeerService {
         this.beers = beers;
     }
 
-   public Beer save(final Beer beer){
-       Optional<Beer> beerByNameAndType = beers.findByNameAndType(beer.getName(), beer.getType());
+    public Beer save(final Beer beer) {
+        verifyIfBeerExists(beer);
+        return beers.save(beer);
+    }
 
-       if(beerByNameAndType.isPresent()){
-           throw new BeerAlreadExistException();
-       }
+    private void verifyIfBeerExists(final Beer beer) {
+        Optional<Beer> beerByNameAndType = beers.findByNameAndType
+                (beer.getName(), beer.getType());
 
-       return beers.save(beer);
-   }
+        if (beerByNameAndType.isPresent() && (beer.isNew() ||
+                isUpdatingToADifferentBeer(beer, beerByNameAndType))) {
+            throw new BeerAlreadyExistException();
+        }
+    }
+
+    private boolean isUpdatingToADifferentBeer(Beer beer,
+                                               Optional<Beer> beerByNameAndType) {
+        return beer.alreadyExist() && !beerByNameAndType.get()
+                .equals(beer);
+    }
+
 }
