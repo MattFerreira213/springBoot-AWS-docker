@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import br.com.project.BeerStore.error.ErrorResponse.ApiError;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Locale;
 import static java.util.stream.Collectors.toList;
@@ -63,6 +64,13 @@ public class ApiExceptionHandler {
         final HttpStatus status = exception.getStatus();
         final ErrorResponse errorResponse = ErrorResponse.of(status, toApiError(errorCode, locale));
         return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlerEntityNotFoundException(EntityNotFoundException exception
+            , Locale locale) {
+        LOG.error("Error searching entity: ", exception);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.of(HttpStatus.NOT_FOUND, toApiError("error-2", locale)));
     }
 
     public ApiError toApiError(String code, Locale locale, Object... args){

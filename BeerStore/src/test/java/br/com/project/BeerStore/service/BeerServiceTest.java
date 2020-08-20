@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -118,4 +119,15 @@ public class BeerServiceTest {
 
         beerService.save(beerToUpdate);
     }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void should_delete_beer(){
+        final Beer beerInDatabase = new Beer();
+        beerInDatabase.setId(5L);
+        
+        when(beersMocked.findById(5L)).thenReturn(Optional.empty());
+
+        beerService.delete(5L);
+    }
+
 }

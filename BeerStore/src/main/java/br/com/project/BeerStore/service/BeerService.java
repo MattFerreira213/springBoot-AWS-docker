@@ -6,6 +6,7 @@ import br.com.project.BeerStore.service.exception.BeerAlreadyExistException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 
 @Service
@@ -38,4 +39,11 @@ public class BeerService {
                 .equals(beer);
     }
 
+    public void delete(final Long id){
+        Optional beerDel = beers.findById(id);
+        if (!beerDel.isPresent()){
+            throw new EntityNotFoundException();
+        }
+        beers.deleteById(id);
+    }
 }
